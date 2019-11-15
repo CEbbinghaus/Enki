@@ -3,14 +3,23 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using UnityEngine;
+using System.IO.Compression;
 
-namespace Merlin
+namespace Enki
 {
-    static class Merlin
+    static class Enki
     {
-        public static List<MerlinMod> Mods = new List<MerlinMod>();
+        public static List<Mod> Mods = new List<Mod>();
+
+		public static void Start() {
+		}
+
+		public static void Update() {
+		}
+
+		public static void UnpackMods(){
+
+		}
 
         public static void LoadMods()
         {
@@ -28,7 +37,7 @@ namespace Merlin
 
             //all Files in Directory
 
-            foreach (var file in Directory.GetFiles(path))
+			foreach(var file in Directory.GetFiles(path))
             {
                 if (file.EndsWith(".dll"))
                 {
@@ -38,7 +47,7 @@ namespace Merlin
                     }
                     catch (Exception e)
                     {
-                        Debug.Log(e);
+						Console.WriteLine("Loaded Mod");
                     }
                 }
 
@@ -58,7 +67,7 @@ namespace Merlin
                 }
                 catch(Exception e)
                 {
-                    Debug.Log(e);
+					Console.WriteLine("Checked Directory");
                 }
             }
 
@@ -83,7 +92,7 @@ namespace Merlin
             var assembly = Assembly.LoadFrom(path);
             foreach (var type in FindModTypes(assembly))
             {
-                var mod = Activator.CreateInstance(type) as MerlinMod;
+                var mod = Activator.CreateInstance(type) as Mod;
                 mod.OnLoad();
                 Mods.Add(mod);
             }
@@ -91,10 +100,10 @@ namespace Merlin
 
         private static IEnumerable<Type> FindModTypes(Assembly assembly)
         {
-            return assembly.GetTypes().Where(t => typeof(MerlinMod).IsAssignableFrom(t));
+            return assembly.GetTypes().Where(t => typeof(Mod).IsAssignableFrom(t));
         }
 
-        public static void Dispatch(Action<MerlinMod> action)
+        public static void Dispatch(Action<Mod> action)
         {
             Mods.ForEach(action);
         }
