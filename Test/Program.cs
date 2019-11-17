@@ -114,6 +114,7 @@ namespace Test
 			else {
 				Enki.File f = loadedMod.files["House.fbx"];
 				int ModelCount = ModelLoader.MeshCount(f);
+				Console.WriteLine("Loaded {0} Models", ModelCount);
 
 				var fl = FileLoader.UnzipFile(loadedMod.file, "./Images/Image.png");
 
