@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using Enki.Extensions;
+using Assimp;
 
 namespace Enki.Models
 {
@@ -32,11 +33,38 @@ namespace Enki.Models
 	}
 
 	public static class ModelLoader {
-		public static Model LoadModel(File model) {
+		public static Scene LoadScene(File model) {
+			if (model.FileType != File.Type.Model) return null;
+
+			Assimp.AssimpContext ctx = new Assimp.AssimpContext();
+			Assimp.Scene s = ctx.ImportFileFromStream(model.StreamData);
+			return s;
+		}
+
+		public static Assimp.Mesh LoadModel(File model) {
+			if (model.FileType != File.Type.Model) return null;
+
 			Assimp.AssimpContext ctx = new Assimp.AssimpContext();
 			Assimp.Scene s = ctx.ImportFileFromStream(model.StreamData);
 			if (!s.HasMeshes) return null;
 			return s.Meshes[0];
+		}
+
+		public static Assimp.Mesh[] LoadModels(File model) {
+			if (model.FileType != File.Type.Model) return null;
+
+			Assimp.AssimpContext ctx = new Assimp.AssimpContext();
+			Assimp.Scene s = ctx.ImportFileFromStream(model.StreamData);
+			if (!s.HasMeshes) return null;
+			return s.Meshes.ToArray();
+		}
+
+		public static int MeshCount(File model) {
+			if (model.FileType != File.Type.Model) return -1;
+
+			Assimp.AssimpContext ctx = new Assimp.AssimpContext();
+			Assimp.Scene s = ctx.ImportFileFromStream(model.StreamData);
+			return s.MeshCount;
 		}
 	}
 }

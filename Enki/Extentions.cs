@@ -6,11 +6,16 @@ namespace Enki.Extensions
 {
 	public static class Ext
 	{
-		public static Weather Instance(this Weather i){
-			return (Weather)typeof(Weather).GetField("inst", BindingFlags.GetField | BindingFlags.Static | BindingFlags.Instance).GetValue(null);
-		}
-		public static World Instance(this World i){
-			return (World)typeof(World).GetField("inst", BindingFlags.GetField | BindingFlags.Static | BindingFlags.Instance).GetValue(null);
+		//public static Weather Instance(this Weather i){
+		//	return (Weather)typeof(Weather).GetField("inst", BindingFlags.GetField | BindingFlags.Static | BindingFlags.Instance).GetValue(null);
+		//}
+		//public static World Instance(this World i){
+		//	return (World)typeof(World).GetField("inst", BindingFlags.GetField | BindingFlags.Static | BindingFlags.Instance).GetValue(null);
+		//}
+
+		public static T GetProperty<T>(this object o, string key) {
+			if (o == null) return default(T);
+			return (T)o.GetType().GetField(key).GetValue(o);
 		}
 
 		public static Stream StringStream(string input) {

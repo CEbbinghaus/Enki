@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Xml.Serialization;
 using System.IO;
 using System.Text;
+using Enki.Extensions;
 
 namespace Enki {
 	[System.Serializable]
@@ -21,23 +22,57 @@ namespace Enki {
 			ModConfig LoadedConfig = (ModConfig)deserializer.Deserialize(data.StreamData);
 			return LoadedConfig;
 		}
+
+		public override int GetHashCode() {
+			return string.Format("{0}.{1}.{2}", Author, Name, Version).GetHashCode();
+		}
+	}
+
+	public class Lookup<T> {
+
+		List<T> items;
+		string key;
+
+		internal Lookup(List<T> f, string key) {
+			this.key = key;
+			var field = typeof(T).GetField(key);
+			if (field == null || field.FieldType != typeof(string))
+				throw new System.Exception("Lookup Type must Specify The Key " + key);
+			items = f;
+		}
+
+		public T this[string name]{
+			get {
+				foreach (T item in items) {
+					if (item.GetProperty<string>(key) == name) return item;
+				}
+				return default(T);
+			}
+		}
 	}
 
 	public class ModData {
 		public string Name {
 			get { return config.Name; }
 		}
+		internal string rootDir;
 		public ZipArchive file;
 		public ModConfig config;
-		public List<File> LoadedFiles = new List<File>();
+		private List<File> LoadedFiles = new List<File>();
+		public Lookup<File> files;
 		public List<Models.Model> LoadedModels = new List<Models.Model>();
 		public bool _enabled = true;
+
+		internal ModData() {
+			files = new Lookup<File>(LoadedFiles, "Name");
+		}
+
 
 		public ModConfig LoadConfig() {
 
 			if (file == null) throw new System.Exception("The Mod is Missing its Corresponding File.");
 
-			File UnzippedConfig = FileLoader.UnzipConfig(file);
+			File UnzippedConfig = LoadFile("Config.xml");
 
 			if (UnzippedConfig == null) throw new System.Exception("Cannot Find Config File.");
 
@@ -45,39 +80,68 @@ namespace Enki {
 		}
 
 		public File LoadFile(string path) {
+
+			string finalPath = rootDir + path;
 			//Search Through Loaded files and Check if File has been Already Loaded
-			int index = LoadedFiles.FindIndex(v => v.path == path);
+			int index = LoadedFiles.FindIndex(v => v.Path == finalPath);
+			if (index != -1) return LoadedFiles[index];
+			
+			//Load file, Cache Loaded Instance, Return Result
+			File f = FileLoader.UnzipFile(file, finalPath);
+			if (f == null)return null;
+			LoadedFiles.Add(f);
+			return f;
+		}
+
+		public File LoadPathFile(string path) {
+
+			//Search Through Loaded files and Check if File has been Already Loaded
+			int index = LoadedFiles.FindIndex(v => v.Path == path);
 			if (index != -1) return LoadedFiles[index];
 			
 			//Load file, Cache Loaded Instance, Return Result
 			File f = FileLoader.UnzipFile(file, path);
+			if (f == null)return null;
 			LoadedFiles.Add(f);
 			return f;
 		}
 	}
 
-    public class Mod: ModData{
+    public class Mod{
+
+		internal ModData data;
+
+		public override int GetHashCode(){
+			if (data == null) return -1;
+			return data.GetHashCode();
+		}
 
 		/// <summary>
 		/// Wether the Mod is Enabled and will be Updated
 		/// </summary>
 		public bool Enabled{
-			get { return _enabled; }
+			get { return data._enabled; }
 			set {
-				if (_enabled)
+				if (data._enabled)
 					if (!value)
 					{
 						BeforeUnload();
 						OnUnload();
-						_enabled = value;
+						data._enabled = value;
 					}
 					else
 					if (value)
 					{
 						BeforeLoad();
 						OnLoad();
-						_enabled = value;
+						data._enabled = value;
 					}
+			}
+		}
+
+		public string Name {
+			get {
+				return data.Name;
 			}
 		}
 
