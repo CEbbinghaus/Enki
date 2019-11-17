@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Name>TestMod</Name>
+  <Author>CEbbinghaus</Author>
+  <Version>0.1.0</Version>
+  <Entry>Index.cs</Entry>
+  <Include>
+    <Path>./**/*.fbx</Path>
+  </Include>
+</ModConfig>
