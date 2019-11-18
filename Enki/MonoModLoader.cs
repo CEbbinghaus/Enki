@@ -24,7 +24,7 @@ namespace Enki
 			TextOutput = (new GameObject()).AddComponent<Text>();
 			TextOutput.font = Font.CreateDynamicFontFromOSFont("Arial", 32);
 			TextOutput.transform.SetParent(ModCanvas.transform);
-			TextOutput.text = "Running Enki on Version: 0.1.723";
+			TextOutput.text = "Running Enki on Version: " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
 			RectTransform t = TextOutput.transform as RectTransform;
 
 			Rect rect = t.rect;
@@ -34,30 +34,37 @@ namespace Enki
 			t.sizeDelta = new Vector2(200, 50);
 			t.anchoredPosition = new Vector2(50f, -50f);
 
-			try
+			//try {
+			//} catch (exception e) {
+			//	console.writeline("there was an error at {0}", e.stacktrace);
+			//	console.error.writeline(e.);
+			//}
+			Initialize();
+		}
+
+		void Initialize() {
+			ModData loadedMod = FileLoader.LoadModData("./Mods/TestMod.zip");
+
+			if (loadedMod == null)
+				Console.WriteLine("Mod could not be Found");
+			else
 			{
-				//Assimp.CompileFlags test = Assimp.CompileFlags.Debug;
-				//Console.WriteLine("CompileFlag Test: {0}", test);
-				System.IO.Compression.ZipArchiveEntry test = null;
+				Console.WriteLine("Loading Model");
+				Enki.File f = loadedMod.files["House.fbx"];
+				Console.WriteLine("Loading Image");
+				Enki.File i = loadedMod.LoadFile("./Images/Image.png");
+				Console.WriteLine("Loading Code");
+				Enki.File c = loadedMod.LoadFile("./Index.cs");
 
-				Console.WriteLine("ZipEntry Test: {0}", test);
+				if (f == null) Console.WriteLine("Model could not be Loaded");
+				if (i == null) Console.WriteLine("Image could not be Loaded");
+				if (c == null) Console.WriteLine("Code could not be Loaded");
 
-				//ModData loadedMod = FileLoader.LoadMod("./Mods/TestMod.zip");
-				//if (loadedMod == null) Console.WriteLine("Mod could not be Found");
-				//else
-				//{
-				//	Enki.File f = loadedMod.files["House.fbx"];
-				//	Enki.File i = loadedMod.LoadFile("./Images/Image.png");
-
-				//	if (i == null) Console.WriteLine("Image could not be Loaded");
-
-				//	Console.WriteLine(i.TextureData.graphicsFormat);
-				//}
+				Mod m = Compiling.Compiler.CompileFile(f);
+				Console.WriteLine("Compiled Code from Zipped Mod file: {0}", m);
+				Console.WriteLine("Loaded {0} Models from Zipped Mod file", Models.ModelLoader.MeshCount(f));
+				Console.WriteLine("Loaded Image from Zipped Mod file with a Width of: {0}", i.ImageData.Width);
 			}
-			catch (Exception e) {
-				Console.Error.WriteLine(e.ToString());
- 			}
-
 		}
 
 		//void Update() {

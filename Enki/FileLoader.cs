@@ -1,6 +1,5 @@
 ﻿using System.IO.Compression;
 using System.IO;
-using System.Xml.Serialization;
 using System.Collections.Generic;
 using System;
 using System.Linq;
@@ -88,9 +87,9 @@ namespace Enki{
 
 		public Texture2D TextureData {
 			get {
-				Image imgData = ImageData;
-				Texture2D texture = new Texture2D(imgData.Width, imgData.Height);
-				if (ImageConversion.LoadImage(texture, Data))
+				Texture2D texture = new Texture2D(0, 0);
+				texture.LoadRawTextureData(Data);
+				if (texture.width > 0 && texture.height > 0)
 					return texture;
 				else
 					return null; 
@@ -99,8 +98,9 @@ namespace Enki{
 	}
 
 	public static class FileLoader{
-		public static ModData LoadMod(string file) {
-			string path = Path.GetFullPath(file);
+		public static ModData LoadModData(string file) {
+			string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, file.Replace("./", ""));
+
 			string fileName = Path.GetFileName(path);
 			 ModData d = new ModData();
 

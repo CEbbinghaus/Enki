@@ -109,7 +109,7 @@ namespace Test
 
 
 
-			ModData loadedMod = FileLoader.LoadMod("../Mods/TestMod.zip");
+			ModData loadedMod = FileLoader.LoadModData("../Mods/TestMod.zip");
 			if (loadedMod == null) Console.WriteLine("Mod could not be Found");
 			else {
 				Enki.File f = loadedMod.files["House.fbx"];

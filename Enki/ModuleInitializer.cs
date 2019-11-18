@@ -117,15 +117,16 @@ namespace Enki
 
 //				return;
 //			}
-//			catch(Exception e){
+//			catch (Exception e)
+//			{
 //				bool FileNotWritten = true;
 
 //				// Define the temporary storage location of the DLL/assembly
 //				string TempFilePath = Path.GetTempPath() + FileName;
 
-//				#if DEBUG
-//					Console.WriteLine("Could not Load Assembly from a byte[]\n{0}", e.ToString());
-//				#endif
+//#if DEBUG
+//				Console.WriteLine("Could not Load Assembly from a byte[]\n{0}", e.ToString());
+//#endif
 
 //				using (SHA1CryptoServiceProvider SHA1 = new SHA1CryptoServiceProvider())
 //				{
@@ -136,9 +137,9 @@ namespace Enki
 //					if (File.Exists(TempFilePath))
 //					{
 
-//						#if DEBUG
-//							Console.WriteLine("File Already Exists at Location: {0}", TempFilePath);
-//						#endif
+//#if DEBUG
+//						Console.WriteLine("File Already Exists at Location: {0}", TempFilePath);
+//#endif
 
 //						// Get the hash value of the existed file
 //						string HashValueOfExistingFile = BitConverter.ToString(
