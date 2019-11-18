@@ -5,4 +5,4 @@ using System.Linq;
 using System.Reflection;
 using System.IO.Compression;
 
-class EnkiModLoader{}
+public class EnkiModLoader{}

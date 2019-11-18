@@ -9,11 +9,12 @@ namespace Enki
 	class ModuleInitializer{
 		public static void Initialize() {
 			try {
+				CosturaUtility.Initialize();
 				Console.WriteLine("Enki Assembly Loaded");
-				Console.WriteLine("Embedded Resources:");
-				foreach (string name in Assembly.GetExecutingAssembly().GetManifestResourceNames()) {
-					Console.WriteLine(name + ",");
-				}
+				//Console.WriteLine("Embedded Resources:");
+				//foreach (string name in Assembly.GetExecutingAssembly().GetManifestResourceNames()) {
+				//	Console.WriteLine(name + ",");
+				//}
 				//Resolve All Dependencies into the Embedded DLL
 				//AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
 				//{
@@ -35,8 +36,8 @@ namespace Enki
 
 				//LoadAssembly("AssimpNet");
 				//Assembly.Load(GetEmbeddedResource("AssimpNet.dll", Assembly.GetExecutingAssembly()));
-				EmbeddedAssembly.Load("AssimpNet.dll");
-				EmbeddedAssembly.Load("System.IO.Compression.dll");
+				//EmbeddedAssembly.Load("AssimpNet.dll");
+				//EmbeddedAssembly.Load("System.IO.Compression.dll");
 
 				ModLoader.Initialize();
 			} catch (Exception e) {
@@ -66,95 +67,94 @@ namespace Enki
 	}
 }
 
-public static class EmbeddedAssembly
-{
-	static Dictionary<string, Assembly> Index = new Dictionary<string, Assembly>();
+//public static class EmbeddedAssembly
+//{
+//	static Dictionary<string, Assembly> Index = new Dictionary<string, Assembly>();
 
-	static EmbeddedAssembly()
-	{
-		AppDomain.CurrentDomain.AssemblyResolve += (s, e) =>
-		{
-			if (Index == null || Index.Count == 0) return null;
-			Console.WriteLine("Trying to resolve {0} through Embedded Resources " + (Index.ContainsKey(e.Name) ? "" : "But it Couldnt find it"), e.Name);
-			if (Index.ContainsKey(e.Name)) return Index[e.Name];
-			return null;
-		};
-	}
+//	static EmbeddedAssembly()
+//	{
+//		AppDomain.CurrentDomain.AssemblyResolve += (s, e) =>
+//		{
+//			if (Index == null || Index.Count == 0) return null;
+//			Console.WriteLine("Trying to resolve {0} through Embedded Resources " + (Index.ContainsKey(e.Name) ? "" : "But it Couldnt find it"), e.Name);
+//			if (Index.ContainsKey(e.Name)) return Index[e.Name];
+//			return null;
+//		};
+//	}
 
-	static void Add(Assembly assembly) { Index.Add(assembly.FullName, assembly); }
+//	static void Add(Assembly assembly) { Index.Add(assembly.FullName, assembly); }
 
-	/// <summary>
-	/// Load Assembly, DLL from Embedded Resources into memory.
-	/// </summary>
-	/// <param name="EmbeddedResource">Embedded Resource string. Example: WindowsFormsApplication1.SomeTools.dll</param>
-	/// <param name="FileName">File Name. Example: SomeTools.dll</param>
-	public static void Load(string FileName)
-	{
-		Assembly assembly = Assembly.GetExecutingAssembly();
+//	/// <summary>
+//	/// Load Assembly, DLL from Embedded Resources into memory.
+//	/// </summary>
+//	/// <param name="EmbeddedResource">Embedded Resource string. Example: WindowsFormsApplication1.SomeTools.dll</param>
+//	/// <param name="FileName">File Name. Example: SomeTools.dll</param>
+//	public static void Load(string FileName)
+//	{
+//		Assembly assembly = Assembly.GetExecutingAssembly();
 
-		string EmbeddedResource = assembly.GetName().Name + ".Resources." + FileName.Replace(" ", "_")
-																					.Replace("\\", ".")
-																					.Replace("/", ".");
+//		string EmbeddedResource = assembly.GetName().Name + ".Resources." + FileName.Replace(" ", "_")
+//																					.Replace("\\", ".")
+//																					.Replace("/", ".");
 
-		Console.WriteLine("Trying to load Embedded Assembly: {0}", EmbeddedResource);
-		byte[] ByteArray = null;
+//		Console.WriteLine("Trying to load Embedded Assembly: {0}", EmbeddedResource);
+//		byte[] ByteArray = null;
 
-		using (Stream ResourceStream = assembly.GetManifestResourceStream(EmbeddedResource))
-		{
-			// Either the file is not existed or it is not mark as embedded resource
-			if (ResourceStream == null) throw new Exception(EmbeddedResource + " was not found in Embedded Resources.");
+//		using (Stream ResourceStream = assembly.GetManifestResourceStream(EmbeddedResource))
+//		{
+//			// Either the file is not existed or it is not mark as embedded resource
+//			if (ResourceStream == null) throw new Exception(EmbeddedResource + " was not found in Embedded Resources.");
 
-			// Get byte[] from the file from embedded resource
-			ByteArray = new byte[(int)ResourceStream.Length];
-			ResourceStream.Read(ByteArray, 0, (int)ResourceStream.Length);
+//			// Get byte[] from the file from embedded resource
+//			ByteArray = new byte[(int)ResourceStream.Length];
+//			ResourceStream.Read(ByteArray, 0, (int)ResourceStream.Length);
 
-			try
-			{
+//			try
+//			{
 
-				// Add the assembly/dll into dictionary
-				Add(Assembly.Load(ByteArray));
+//				// Add the assembly/dll into dictionary
+//				Add(Assembly.Load(ByteArray));
 
-				return;
-			}
-			catch
-			{
-				bool FileNotWritten = true;
+//				return;
+//			}
+//			catch(Exception e){
+//				bool FileNotWritten = true;
 
-				// Define the temporary storage location of the DLL/assembly
-				string TempFilePath = Path.GetTempPath() + FileName;
+//				// Define the temporary storage location of the DLL/assembly
+//				string TempFilePath = Path.GetTempPath() + FileName;
 
-				#if DEBUG
-					Console.WriteLine("Could not Write Assembly by byte[]. Using a File Instead. Location: {0}", TempFilePath);
-				#endif
+//				#if DEBUG
+//					Console.WriteLine("Could not Load Assembly from a byte[]\n{0}", e.ToString());
+//				#endif
 
-				using (SHA1CryptoServiceProvider SHA1 = new SHA1CryptoServiceProvider())
-				{
-					// Get the hash value from embedded DLL/assembly
-					string HashValue = BitConverter.ToString(SHA1.ComputeHash(ByteArray)).Replace("-", string.Empty);
+//				using (SHA1CryptoServiceProvider SHA1 = new SHA1CryptoServiceProvider())
+//				{
+//					// Get the hash value from embedded DLL/assembly
+//					string HashValue = BitConverter.ToString(SHA1.ComputeHash(ByteArray)).Replace("-", string.Empty);
 
-					// Determines whether the DLL/assembly is existed or not
-					if (File.Exists(TempFilePath))
-					{
+//					// Determines whether the DLL/assembly is existed or not
+//					if (File.Exists(TempFilePath))
+//					{
 
-						#if DEBUG
-							Console.WriteLine("File Already Exists at Location: {0}", TempFilePath);
-						#endif
+//						#if DEBUG
+//							Console.WriteLine("File Already Exists at Location: {0}", TempFilePath);
+//						#endif
 
-						// Get the hash value of the existed file
-						string HashValueOfExistingFile = BitConverter.ToString(
-							SHA1.ComputeHash(File.ReadAllBytes(TempFilePath))).Replace("-", string.Empty);
+//						// Get the hash value of the existed file
+//						string HashValueOfExistingFile = BitConverter.ToString(
+//							SHA1.ComputeHash(File.ReadAllBytes(TempFilePath))).Replace("-", string.Empty);
 
-						// Compare the existed DLL/assembly with the Embedded DLL/assembly
-						if (HashValue == HashValueOfExistingFile) FileNotWritten = false;
-					}
-				}
+//						// Compare the existed DLL/assembly with the Embedded DLL/assembly
+//						if (HashValue == HashValueOfExistingFile) FileNotWritten = false;
+//					}
+//				}
 
-				// Create the file on disk
-				if (FileNotWritten) File.WriteAllBytes(TempFilePath, ByteArray);
+//				// Create the file on disk
+//				if (FileNotWritten) File.WriteAllBytes(TempFilePath, ByteArray);
 
-				// Add the loaded DLL/assembly into dictionary
-				Add(Assembly.LoadFrom(TempFilePath));
-			}
-		}
-	}
-}
+//				// Add the loaded DLL/assembly into dictionary
+//				Add(Assembly.LoadFile(TempFilePath));
+//			}
+//		}
+//	}
+//}
