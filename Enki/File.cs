@@ -53,8 +53,8 @@ namespace Enki
 			if (Extention == ".dll") return HandledObj = System.Reflection.Assembly.Load(Data);
 			if (Extention == ".cs") return HandledObj = null; //TODO: Find a way to Runtime compile
 			if (Extention == ".xml") return HandledObj = null; //TODO: Dont know what to do with this yet...
-			if (Extention == ".fbx") return HandledObj = SceneData;
-			if (Extention == ".obj") return HandledObj = SceneData;
+			if (Extention == ".fbx") return HandledObj = MeshData;
+			if (Extention == ".obj") return HandledObj = MeshData;
 			if (Extention == ".jpg") return HandledObj = ImageData;
 			if (Extention == ".png") return HandledObj = ImageData;
 			if (Extention == ".bmp") return HandledObj = ImageData;
@@ -82,17 +82,17 @@ namespace Enki
 			}
 		}
 
-		public Assimp.Mesh[] MeshData {
+		public UnityEngine.Mesh MeshData {
 			get {
-				return ModelLoader.LoadModels(this);
+				return ModelLoader.ToUnityMesh(this);
 			}
 		}
 
-		public Assimp.Scene SceneData {
-			get {
-				return ModelLoader.LoadScene(this);
-			}
-		}
+		//public Assimp.Scene SceneData {
+		//	get {
+		//		return ModelLoader.LoadScene(this);
+		//	}
+		//}
 
 		public Image ImageData {
 			get {

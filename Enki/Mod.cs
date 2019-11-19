@@ -61,7 +61,7 @@ namespace Enki {
 		public ModConfig config;
 		private List<File> LoadedFiles = new List<File>();
 		public Lookup<File> files;
-		public List<Models.Model> LoadedModels = new List<Models.Model>();
+		//public List<Models.Model> LoadedModels = new List<Models.Model>();
 		public bool _enabled = true;
 		public Mod mod;
 
@@ -142,6 +142,7 @@ namespace Enki {
 			if (file == null) throw new System.Exception("Assembly could not be Loaded");
 			mod = (Mod)file.CreateInstance(Path.GetFileNameWithoutExtension(config.Entry));
 			if (mod == null) throw new System.Exception("Could not Load Mod. Ensure the Class is in the Global scope and named the same as the File");
+			mod.data = this;
 
 			mod.BeforeLoad();
 
@@ -161,7 +162,7 @@ namespace Enki {
 		/// <summary>
 		/// Wether the Mod is Enabled and will be Updated
 		/// </summary>
-		public bool Enabled{
+		internal bool Enabled{
 			get { return data._enabled; }
 			set {
 				if (data._enabled)
@@ -181,9 +182,15 @@ namespace Enki {
 			}
 		}
 
-		public string Name {
+		internal string Name {
 			get {
 				return data.Name;
+			}
+		}
+
+		public ModData Data {
+			get {
+				return data;
 			}
 		}
 

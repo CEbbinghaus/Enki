@@ -62,7 +62,7 @@ namespace Enki
 
 			string[] mods = Array.FindAll(Directory.GetFiles(ModLoader.ModDir), path => path.ToLower().EndsWith(".zip"));
 
-			Console.WriteLine("Found {0} Mods.", mods.Length);
+			Console.WriteLine("Found {0} Mod{1}.", mods.Length, (mods.Length == 1 ? "" : "s"));
 
 			foreach (string modPath in mods) {
 				try{
@@ -74,7 +74,7 @@ namespace Enki
 
 			}
 
-			Console.WriteLine("Managed to load {0} Mods", ModLoader.Mods.Count);
+			Console.WriteLine("Managed to load {0} Mod{1}.", ModLoader.Mods.Count, (ModLoader.Mods.Count == 1 ? "" : "s"));
 		}
 
 		void Update()
