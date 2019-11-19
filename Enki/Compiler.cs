@@ -1,15 +1,13 @@
-﻿using System.Reflection;
-using System.CodeDom.Compiler;
+﻿using System.CodeDom.Compiler;
 using Microsoft.CSharp;
-using System.IO;
 using System;
 
 namespace Enki.Compiling
 {
 	public static class Compiler{
 		public static Mod CompileFile(File data) {
-			var provider = new Microsoft.CSharp.CSharpCodeProvider();
-			var parameters = new System.CodeDom.Compiler.CompilerParameters();
+			var provider = new CSharpCodeProvider();
+			var parameters = new CompilerParameters();
 
 			parameters.ReferencedAssemblies.Add("Enki.dll");
 
@@ -23,12 +21,12 @@ namespace Enki.Compiling
 			Console.WriteLine("Finished Compalation {0}", res.Errors.HasErrors ? "With errors" : "");
 
 			if (res.Errors.HasErrors) {
-				foreach (Exception e in res.Errors)
+				foreach (System.Exception e in res.Errors)
 					throw e;
 			}
 
-			Assembly assembly = res.CompiledAssembly;
-			System.Type program = assembly.GetType(Path.GetFileNameWithoutExtension(data.Name));
+			System.Reflection.Assembly assembly = res.CompiledAssembly;
+			Type program = assembly.GetType(System.IO.Path.GetFileNameWithoutExtension(data.Name));
 
 			var m = Activator.CreateInstance(program) as Mod;
 			return m;

@@ -49,21 +49,24 @@ namespace Enki
 				Console.WriteLine("Mod could not be Found");
 			else
 			{
-				Console.WriteLine("Loading Model");
-				Enki.File f = loadedMod.files["House.fbx"];
-				Console.WriteLine("Loading Image");
-				Enki.File i = loadedMod.LoadFile("./Images/Image.png");
-				Console.WriteLine("Loading Code");
-				Enki.File c = loadedMod.LoadFile("./Index.cs");
+				//Console.WriteLine("Loading Model");
+				//Enki.File f = loadedMod.files["House.fbx"];
+				//Console.WriteLine("Loading Image");
+				//Enki.File i = loadedMod.LoadFile("./Images/Image.png");
+				//Console.WriteLine("Loading Code");
+				//Enki.File c = loadedMod.LoadFile("./Index.cs");
 
-				if (f == null) Console.WriteLine("Model could not be Loaded");
-				if (i == null) Console.WriteLine("Image could not be Loaded");
-				if (c == null) Console.WriteLine("Code could not be Loaded");
+				//if (f == null) Console.WriteLine("Model could not be Loaded");
+				//if (i == null) Console.WriteLine("Image could not be Loaded");
+				//if (c == null) Console.WriteLine("Code could not be Loaded");
 
-				Mod m = Compiling.Compiler.CompileFile(f);
-				Console.WriteLine("Compiled Code from Zipped Mod file: {0}", m);
-				Console.WriteLine("Loaded {0} Models from Zipped Mod file", Models.ModelLoader.MeshCount(f));
-				Console.WriteLine("Loaded Image from Zipped Mod file with a Width of: {0}", i.ImageData.Width);
+				//Mod m = Compiling.Compiler.CompileFile(f);
+				//Console.WriteLine("Compiled Code from Zipped Mod file: {0}", m);
+				//Console.WriteLine("Loaded {0} Models from Zipped Mod file", Models.ModelLoader.MeshCount(f));
+				//Console.WriteLine("Loaded Image from Zipped Mod file with a Width of: {0}", i.ImageData.Width);
+
+				Mod m = loadedMod.LoadMod();
+				m.OnLoad();
 			}
 		}
 

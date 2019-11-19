@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Xml.Serialization;
 using System.IO;
 using System.Text;
+using System.Reflection;
 using Enki.Extensions;
 
 namespace Enki {
@@ -56,21 +57,25 @@ namespace Enki {
 			get { return config.Name; }
 		}
 		internal string rootDir;
-		public ZipArchive file;
+		public ZipArchive File;
 		public ModConfig config;
 		private List<File> LoadedFiles = new List<File>();
 		public Lookup<File> files;
 		public List<Models.Model> LoadedModels = new List<Models.Model>();
 		public bool _enabled = true;
+		public Mod mod;
 
-		internal ModData() {
+		internal ModData(ZipArchive file, string name) {
+			rootDir = name + "/";
+			this.File = file;
 			files = new Lookup<File>(LoadedFiles, "Name");
+			config = LoadConfig();
 		}
 
 
 		public ModConfig LoadConfig() {
 
-			if (file == null) throw new System.Exception("The Mod is Missing its Corresponding File.");
+			if (File == null) throw new System.Exception("The Mod is Missing its Corresponding File.");
 
 			File UnzippedConfig = LoadFile("Config.xml");
 
@@ -82,12 +87,13 @@ namespace Enki {
 		public File LoadFile(string path) {
 
 			string finalPath = rootDir + path;
+
 			//Search Through Loaded files and Check if File has been Already Loaded
 			int index = LoadedFiles.FindIndex(v => v.Path == finalPath);
 			if (index != -1) return LoadedFiles[index];
 			
 			//Load file, Cache Loaded Instance, Return Result
-			File f = FileLoader.UnzipFile(file, finalPath);
+			File f = FileLoader.UnzipFile(File, finalPath);
 			if (f == null)return null;
 			LoadedFiles.Add(f);
 			return f;
@@ -100,10 +106,23 @@ namespace Enki {
 			if (index != -1) return LoadedFiles[index];
 			
 			//Load file, Cache Loaded Instance, Return Result
-			File f = FileLoader.UnzipFile(file, path);
+			File f = FileLoader.UnzipFile(File, path);
 			if (f == null)return null;
 			LoadedFiles.Add(f);
 			return f;
+		}
+
+		public Mod LoadMod() {
+			File entry = LoadFile(config.Entry);
+			if (entry == null) throw new System.Exception("No Entry could be Found. Please ensure the File exists");
+			if (entry.FileType != Enki.File.Type.Libary && entry.FileType != Enki.File.Type.Script) throw new System.Exception("Entry must be a .cs or .dll file");
+
+			Assembly file = (Assembly)entry.HandleData();
+			if (file == null) throw new System.Exception("Assembly could not be Loaded");
+			mod = (Mod)file.CreateInstance(Path.GetFileNameWithoutExtension(config.Entry));
+			if (mod == null) throw new System.Exception("Could not Load Mod. Ensure the Class is in the Global scope and named the same as the File");
+			mod.BeforeLoad();
+			return mod;
 		}
 	}
 

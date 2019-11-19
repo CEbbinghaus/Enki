@@ -10,121 +10,26 @@ using UnityEngine;
 
 namespace Enki{
 
-	public class File{
-		public enum Type {
-			Undefined,
-			Config,
-			Script,
-			Libary,
-			Model,
-			Texture
-		};
-
-		Dictionary<string, Type> extentions = new Dictionary<string, Type>() {
-			{".cs", Type.Script},
-			{".dll", Type.Libary },
-			{".xml", Type.Config },
-			{".fbx", Type.Model },
-			{".obj", Type.Model },
-			{".jpg", Type.Texture },
-			{".png", Type.Texture },
-			{".bmp", Type.Texture }
-		};
-
-		public Type FileType = Type.Undefined;
-		public string Name;
-		public string Path;
-		public byte[] Data;
-
-		public File(string path, Stream data) {
-			Name = System.IO.Path.GetFileName(path);
-			Path = path;
-			StreamData = data;
-
-			string ext = System.IO.Path.GetExtension(path).ToLower();
-			FileType = extentions[ext];
-		}
-
-		public string StringData {
-			get {
-				return Encoding.Default.GetString(Data);
-			}
-			set {
-				Data = Encoding.Default.GetBytes(value);
-			}
-		}
-
-		public Stream StreamData {
-			get {
-				return new MemoryStream(Data);
-			}
-			set {
-				var ms = new MemoryStream();
-				value.CopyTo(ms);
-				ms.Seek(0, SeekOrigin.Begin);
-				Data = ms.ToArray();
-			}
-		}
-
-		public Assimp.Mesh[] MeshData {
-			get {
-				return ModelLoader.LoadModels(this);
-			}
-		}
-
-		public Assimp.Scene SceneData {
-			get {
-				return ModelLoader.LoadScene(this);
-			}
-		}
-
-		public Image ImageData {
-			get {
-				Image img = Image.FromStream(StreamData);
-				return img;
-			}
-		}
-
-		public Texture2D TextureData {
-			get {
-				Texture2D texture = new Texture2D(0, 0);
-				texture.LoadRawTextureData(Data);
-				if (texture.width > 0 && texture.height > 0)
-					return texture;
-				else
-					return null; 
-			}
-		}
-	}
-
 	public static class FileLoader{
 		public static ModData LoadModData(string file) {
+
 			string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, file.Replace("./", ""));
-
-			string fileName = Path.GetFileName(path);
-			 ModData d = new ModData();
-
-			ZipArchive ModFile = LoadZipFile(path);
-			if (ModFile == null)return null;
 
 			//Gets the Case Sensitive Filename By Searching through the Directory
 			string RootName = Path.GetFileNameWithoutExtension(Directory.GetFiles(Path.GetDirectoryName(path), Path.GetFileName(path)).FirstOrDefault());
-			d.rootDir = RootName + "/";
 
-			d.file = ModFile;
+			ModData data = new ModData(LoadZipFile(path), RootName);
 
-			ModConfig config = d.LoadConfig();
-
-			Glob[] patterns = Array.ConvertAll(config.Include, v => new Glob(v, d.rootDir));
+			Glob[] patterns = Array.ConvertAll(data.config.Include, v => new Glob(v, data.rootDir));
 
 			foreach(Glob g in patterns){
-				foreach (var ZippedFile in d.file.Entries){
+				foreach (var ZippedFile in data.File.Entries){
 					if (g.Match(ZippedFile.FullName))
-						d.LoadPathFile(ZippedFile.FullName);
+						data.LoadPathFile(ZippedFile.FullName);
 				}
 			}
 
-			return d;
+			return data;
 		}
 
 		public static ZipArchive LoadZipFile(string path) {
