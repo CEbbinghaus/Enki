@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Xml.Serialization;
 using System.IO;
-using System.Text;
+using System;
 using System.Reflection;
 using Enki.Extensions;
 
@@ -69,11 +69,31 @@ namespace Enki {
 			rootDir = name + "/";
 			this.File = file;
 			files = new Lookup<File>(LoadedFiles, "Name");
-			config = LoadConfig();
+
+			LoadConfig();
+
+
+			Glob[] patterns = Array.ConvertAll(config.Include, v => new Glob(v, rootDir));
+
+			foreach (Glob g in patterns)
+			{
+				foreach (var ZippedFile in File.Entries)
+				{
+					if (g.Match(ZippedFile.FullName)) {
+						File f = LoadPathFile(ZippedFile.FullName);
+						f.HandleData();
+					}
+				}
+			}
+
+			LoadMod();
+			
+			//Registers itself with the Mod Loaders
+			ModLoader.Mods.Add(mod);
 		}
 
 
-		public ModConfig LoadConfig() {
+		public void LoadConfig() {
 
 			if (File == null) throw new System.Exception("The Mod is Missing its Corresponding File.");
 
@@ -81,7 +101,8 @@ namespace Enki {
 
 			if (UnzippedConfig == null) throw new System.Exception("Cannot Find Config File.");
 
-			return config = ModConfig.Deserialize(UnzippedConfig);
+			config = ModConfig.Deserialize(UnzippedConfig);
+			
 		}
 
 		public File LoadFile(string path) {
@@ -121,14 +142,16 @@ namespace Enki {
 			if (file == null) throw new System.Exception("Assembly could not be Loaded");
 			mod = (Mod)file.CreateInstance(Path.GetFileNameWithoutExtension(config.Entry));
 			if (mod == null) throw new System.Exception("Could not Load Mod. Ensure the Class is in the Global scope and named the same as the File");
+
 			mod.BeforeLoad();
+
 			return mod;
 		}
 	}
 
     public class Mod{
 
-		internal ModData data;
+		internal ModData data = null;
 
 		public override int GetHashCode(){
 			if (data == null) return -1;

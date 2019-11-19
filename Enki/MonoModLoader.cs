@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,7 +12,14 @@ namespace Enki
 		Canvas ModCanvas;
 
 		Text TextOutput;
-		void Start() {
+
+		bool hasStarted = false;
+
+		bool ShouldLoad = false;
+
+		void Awake() {
+
+
 			DontDestroyOnLoad(this);
 
 			ModCanvas = gameObject.AddComponent<Canvas>();
@@ -24,7 +29,7 @@ namespace Enki
 			TextOutput = (new GameObject()).AddComponent<Text>();
 			TextOutput.font = Font.CreateDynamicFontFromOSFont("Arial", 32);
 			TextOutput.transform.SetParent(ModCanvas.transform);
-			TextOutput.text = "Running Enki on Version: " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+			TextOutput.text = "Running Enki on Version: " + ModLoader.Version;
 			RectTransform t = TextOutput.transform as RectTransform;
 
 			Rect rect = t.rect;
@@ -34,46 +39,49 @@ namespace Enki
 			t.sizeDelta = new Vector2(200, 50);
 			t.anchoredPosition = new Vector2(50f, -50f);
 
-			//try {
-			//} catch (exception e) {
-			//	console.writeline("there was an error at {0}", e.stacktrace);
-			//	console.error.writeline(e.);
-			//}
-			Initialize();
+			if (!hasStarted)
+				Initialize();
+
+			hasStarted = true;
 		}
 
-		void Initialize() {
-			ModData loadedMod = FileLoader.LoadModData("./Mods/TestMod.zip");
+		void Start() {
+			if (!hasStarted){
+				Console.WriteLine("Start called Before Awake.");
+				Initialize();
+				hasStarted = true;
+			}
 
-			if (loadedMod == null)
-				Console.WriteLine("Mod could not be Found");
-			else
+			foreach (Mod mod in ModLoader.Mods)
 			{
-				//Console.WriteLine("Loading Model");
-				//Enki.File f = loadedMod.files["House.fbx"];
-				//Console.WriteLine("Loading Image");
-				//Enki.File i = loadedMod.LoadFile("./Images/Image.png");
-				//Console.WriteLine("Loading Code");
-				//Enki.File c = loadedMod.LoadFile("./Index.cs");
-
-				//if (f == null) Console.WriteLine("Model could not be Loaded");
-				//if (i == null) Console.WriteLine("Image could not be Loaded");
-				//if (c == null) Console.WriteLine("Code could not be Loaded");
-
-				//Mod m = Compiling.Compiler.CompileFile(f);
-				//Console.WriteLine("Compiled Code from Zipped Mod file: {0}", m);
-				//Console.WriteLine("Loaded {0} Models from Zipped Mod file", Models.ModelLoader.MeshCount(f));
-				//Console.WriteLine("Loaded Image from Zipped Mod file with a Width of: {0}", i.ImageData.Width);
-
-				Mod m = loadedMod.LoadMod();
-				m.OnLoad();
+				mod.OnLoad();
 			}
 		}
 
-		//void Update() {
-		//	if (Input.GetKeyDown(KeyCode.K)) {
-		//		Debug.Log((TextOutput.transform as RectTransform).rect);
-		//	}
-		//}
+		void Initialize() {
+
+			string[] mods = Array.FindAll(Directory.GetFiles(ModLoader.ModDir), path => path.ToLower().EndsWith(".zip"));
+
+			Console.WriteLine("Found {0} Mods.", mods.Length);
+
+			foreach (string modPath in mods) {
+				try{
+					ModData loadedMod = FileLoader.LoadModData(modPath);
+					if(loadedMod == null) Console.WriteLine("Mod Couldnt Load for unknown Reasons");
+				}catch (Exception e) {
+					Console.WriteLine("Failed to Load Mod {0}, {1}", e.Message, e.StackTrace);
+				}
+
+			}
+
+			Console.WriteLine("Managed to load {0} Mods", ModLoader.Mods.Count);
+		}
+
+		void Update()
+		{
+			foreach (Mod mod in ModLoader.Mods) {
+				mod.Update();
+			}
+		}
 	}
 }

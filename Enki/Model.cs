@@ -8,21 +8,24 @@ using Assimp;
 
 namespace Enki.Models
 {
-	public class Model{
+	public class Model
+	{
 		File file;
 		UnityEngine.Vector3[] Verticies;
 		int[] Indicies;
 		UnityEngine.Vector2[] UVs;
 
-		public static implicit operator Model(Assimp.Mesh s) {
+		public static implicit operator Model(Assimp.Mesh s)
+		{
 			Model m = new Model();
-			m.Verticies = s.Vertices.ConvertAll( v => v.ToV3()).ToArray();
+			m.Verticies = s.Vertices.ConvertAll(v => v.ToV3()).ToArray();
 			m.Indicies = s.GetIndices();
 			m.UVs = s.TextureCoordinateChannels[0].ConvertAll(v => v.ToV2()).ToArray();
 			return m;
 		}
 
-		public static implicit operator UnityEngine.Mesh(Model s) {
+		public static implicit operator UnityEngine.Mesh(Model s)
+		{
 			UnityEngine.Mesh m = new UnityEngine.Mesh();
 			m.vertices = s.Verticies;
 			m.triangles = s.Indicies;

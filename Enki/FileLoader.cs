@@ -20,15 +20,6 @@ namespace Enki{
 
 			ModData data = new ModData(LoadZipFile(path), RootName);
 
-			Glob[] patterns = Array.ConvertAll(data.config.Include, v => new Glob(v, data.rootDir));
-
-			foreach(Glob g in patterns){
-				foreach (var ZippedFile in data.File.Entries){
-					if (g.Match(ZippedFile.FullName))
-						data.LoadPathFile(ZippedFile.FullName);
-				}
-			}
-
 			return data;
 		}
 
@@ -51,7 +42,6 @@ namespace Enki{
 			catch (Exception e) {
 				throw new System.Exception("Multiple Files Matching that Path found");
 			}
-			return null;
 		}
 
 		public static File UnzipConfig(ZipArchive mod)  {

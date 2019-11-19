@@ -35,6 +35,8 @@ namespace Enki
 		public string Path;
 		public byte[] Data;
 
+		private object HandledObj = null;
+
 		public File(string path, Stream data)
 		{
 			Name = System.IO.Path.GetFileName(path);
@@ -46,18 +48,18 @@ namespace Enki
 		}
 
 		public object HandleData() {
+			if (HandledObj != null) return HandledObj;
 			string Extention = System.IO.Path.GetExtension(Path).ToLower();
-			if (Extention == ".dll") return System.Reflection.Assembly.Load(Data);
-			if (Extention == ".cs") return null; //TODO: Find a way to Runtime compile
-			if (Extention == ".xml") return null; //TODO: Dont know what to do with this yet...
-			if (Extention == ".fbx") return SceneData;
-			if (Extention == ".obj") return SceneData;
-			if (Extention == ".jpg") return ImageData;
-			if (Extention == ".png") return ImageData;
-			if (Extention == ".bmp") return ImageData;
+			if (Extention == ".dll") return HandledObj = System.Reflection.Assembly.Load(Data);
+			if (Extention == ".cs") return HandledObj = null; //TODO: Find a way to Runtime compile
+			if (Extention == ".xml") return HandledObj = null; //TODO: Dont know what to do with this yet...
+			if (Extention == ".fbx") return HandledObj = SceneData;
+			if (Extention == ".obj") return HandledObj = SceneData;
+			if (Extention == ".jpg") return HandledObj = ImageData;
+			if (Extention == ".png") return HandledObj = ImageData;
+			if (Extention == ".bmp") return HandledObj = ImageData;
 			return null;
 		}
-
 
 		public string StringData {
 			get {

@@ -9,13 +9,19 @@ namespace Enki
 	public class ModLoader{
 		public static ModLoader Instance;
 		public static List<Mod> Mods = new List<Mod>();
-		internal static string ModDir = Path.GetFullPath("Mods/");
-		internal static string ConfigDir = Path.GetFullPath("Mods/Configs/");
-		internal static string DataDir = Path.GetFullPath("Mods/Data");
-		internal static string DisabledDir = Path.GetFullPath("Mods/Disabled");
+
+		internal static string ModDir = GetFullPath("Mods/");
+		internal static string ConfigDir = GetFullPath("Mods/Configs/");
+		internal static string DataDir = GetFullPath("Mods/Data");
+		internal static string DisabledDir = GetFullPath("Mods/Disabled");
 
 
 		public static Version Version = Assembly.GetExecutingAssembly().GetName().Version;
+
+		public static string GetFullPath(string path) {
+			return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, path);
+		}
+
 		public ModLoader() {
 			Console.WriteLine("Enki.ModLoader Loaded");
 
@@ -39,7 +45,7 @@ namespace Enki
 				gm.AddComponent<MonoModLoader>();
 			}
 			catch (Exception e) {
-				Console.Error.WriteLine("Unity DLL is not Loaded. Could not Spawn GameObject");
+				Console.Error.WriteLine("Unity DLL is not Loaded. Could not Spawn GameObject\n{0}", e.ToString());
 			}
 			//return Instance = new ModLoader();
 		}
